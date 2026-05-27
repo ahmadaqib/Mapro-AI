@@ -6,7 +6,8 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const HISTORY_FILE = path.join(__dirname, "history.json");
-const API_KEY = process.env.MIMO_API_KEY ?? "sk-sflnb2jbxt717b29gl1j5lj6a9qum77x9n5rzze82yvt5co5";
+const API_KEY = process.env.MIMO_API_KEY;
+if (!API_KEY) { console.error("Error: MIMO_API_KEY environment variable is required"); process.exit(1); }
 const MODEL = "mimo-v2.5-pro";
 
 // ── ANSI ─────────────────────────────────────────────────────────────────────

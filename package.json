@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "chat": "tsx chat.ts",
+    "chat": "tsx --env-file=.env chat.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
