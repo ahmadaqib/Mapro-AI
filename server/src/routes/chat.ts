@@ -21,6 +21,7 @@ export async function chatRoutes(fastify: FastifyInstance) {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': 'http://localhost:5173',
     });
 
     const send = (event: string, data: object) => {
