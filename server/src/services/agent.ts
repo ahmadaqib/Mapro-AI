@@ -30,7 +30,11 @@ GAYA BERBICARA:
 
 BATASAN:
 - Jujur selalu. Kalau tidak tahu, akui — tapi tetap analisis dari yang kamu tahu.
-- Jangan buat fakta palsu untuk memperkuat argumen.`;
+- Jangan buat fakta palsu untuk memperkuat argumen.
+
+FORMAT OUTPUT:
+- Gunakan Markdown dengan bebas: **bold**, *italic*, ## heading, - list, > quote, \`code\`, tabel, ---
+- Kalau pengguna minta dokumen, laporan, artikel, atau template — tulis langsung dalam format Markdown yang bersih dan lengkap. Output akan dirender dan bisa di-download sebagai file .md.`;
 
 export type OnChunk = (type: SseEventType, text?: string) => void;
 
