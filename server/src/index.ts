@@ -11,5 +11,5 @@ await app.register(cors, {
 
 await app.register(chatRoutes);
 
-await app.listen({ port: 3000, host: '0.0.0.0' });
+await app.listen({ port: 3000, host: '127.0.0.1' });
 console.log('Mapro server → http://localhost:3000');
