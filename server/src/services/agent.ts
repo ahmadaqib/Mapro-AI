@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 import type { Message, SseEventType } from '../types.js';
 
-const API_KEY = process.env.MIMO_API_KEY
-  ?? 'sk-sflnb2jbxt717b29gl1j5lj6a9qum77x9n5rzze82yvt5co5';
+const API_KEY = process.env.MIMO_API_KEY;
+if (!API_KEY) throw new Error('MIMO_API_KEY environment variable is required');
 
 const client = new OpenAI({
   apiKey: API_KEY,
@@ -76,8 +76,8 @@ export async function streamMapro(
 
     onChunk('done');
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    onChunk('error', message);
+    console.error('streamMapro failed:', err);
+    onChunk('error', 'Upstream model request failed');
   }
 
   return { content, reasoning };
