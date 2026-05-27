@@ -276,7 +276,7 @@ import OpenAI from 'openai';
 import type { Message, SseEventType } from '../types.js';
 
 const API_KEY = process.env.MIMO_API_KEY
-  ?? 'sk-sflnb2jbxt717b29gl1j5lj6a9qum77x9n5rzze82yvt5co5';
+  ?? 'sk-REDACTED';
 
 const client = new OpenAI({
   apiKey: API_KEY,

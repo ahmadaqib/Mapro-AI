@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import OpenAI from "openai";
 
-const API_KEY = process.env.MIMO_API_KEY ?? "sk-sflnb2jbxt717b29gl1j5lj6a9qum77x9n5rzze82yvt5co5";
+const API_KEY = process.env.MIMO_API_KEY ?? "";
 const BASE_URL = "https://api.xiaomimimo.com/v1";
 
 const client = new OpenAI({
