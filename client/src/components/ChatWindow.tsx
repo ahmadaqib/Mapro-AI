@@ -17,6 +17,7 @@ export function ChatWindow({ messages }: Props) {
     <div className="chat-window">
       {messages.length === 0 && (
         <div className="empty-state">
+          <img src="/assets/logo.png" alt="Mapro Logo" className="empty-state-logo" />
           <h2>Hai, saya Mapro.</h2>
           <p>Saya tidak akan selalu setuju dengan kamu.<br />Bicara saja.</p>
         </div>

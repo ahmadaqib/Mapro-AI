@@ -70,6 +70,26 @@ body::before {
 
 .sidebar-header { margin-bottom: 10px; }
 
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.logo-text-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
 .logo {
   font-size: 18px;
   font-weight: 600;
@@ -80,7 +100,7 @@ body::before {
 .tagline {
   font-size: 11px;
   color: var(--text-dim);
-  margin-top: 5px;
+  margin-top: 2px;
   letter-spacing: 0.04em;
 }
 
@@ -281,6 +301,18 @@ body::before {
   margin: auto;
   text-align: center;
   padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.empty-state-logo {
+  width: 96px;
+  height: 96px;
+  margin-bottom: 24px;
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: float 6s ease-in-out infinite;
 }
 .empty-state h2 {
   font-size: 26px;
@@ -293,6 +325,11 @@ body::before {
   font-size: 14px;
   color: var(--text-dim);
   line-height: 1.6;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 /* ── Messages ───────────────────────────────────────────────────── */

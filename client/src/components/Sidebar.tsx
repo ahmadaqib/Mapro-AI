@@ -46,8 +46,13 @@ export function Sidebar({
       />
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="logo">MAPRO</div>
-          <div className="tagline">AI Debater · Bahasa Indonesia</div>
+          <div className="logo-container">
+            <img src="/assets/logo.png" alt="Mapro Logo" className="logo-image" />
+            <div className="logo-text-wrapper">
+              <div className="logo">MAPRO</div>
+              <div className="tagline">AI Debater · Bahasa Indonesia</div>
+            </div>
+          </div>
         </div>
         <div className="sidebar-actions">
           <button className="primary-sidebar-btn" onClick={onNewConversation} disabled={isStreaming}>
