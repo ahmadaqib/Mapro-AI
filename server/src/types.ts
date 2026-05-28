@@ -12,6 +12,12 @@ export interface ChatRequest {
   conversationId?: string;
   private?: boolean;
   history?: Message[];
+  fileContext?: FileContext;
+}
+
+export interface FileContext {
+  name: string;
+  text: string;
 }
 
 export interface Conversation {

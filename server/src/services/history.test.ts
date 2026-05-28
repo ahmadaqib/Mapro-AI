@@ -13,6 +13,7 @@ process.env.HISTORY_FILE_OVERRIDE = TEST_FILE;
 const {
   appendHistory,
   createStoredConversation,
+  deleteConversation,
   getConversation,
   listConversations,
   loadHistory,
@@ -65,6 +66,25 @@ describe('history service', () => {
     expect(summaries[1].title).toBe('topik A');
     expect(getConversation(first.id)?.messages).toHaveLength(2);
     expect(getConversation(second.id)?.messages).toHaveLength(2);
+  });
+
+  it('does not list conversations without messages', () => {
+    createStoredConversation();
+    expect(listConversations()).toEqual([]);
+  });
+
+  it('deletes a conversation without deleting others', () => {
+    const first = createStoredConversation();
+    appendHistory('topik A', 'jawaban A', first.id);
+
+    const second = createStoredConversation();
+    appendHistory('topik B', 'jawaban B', second.id);
+
+    expect(deleteConversation(first.id)).toBe(true);
+    expect(getConversation(first.id)).toBeNull();
+    expect(getConversation(second.id)?.messages).toHaveLength(2);
+    expect(listConversations()).toHaveLength(1);
+    expect(deleteConversation('missing')).toBe(false);
   });
 
   it('reads legacy array history as one conversation', () => {

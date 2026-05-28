@@ -160,7 +160,8 @@ body::before {
 .primary-sidebar-btn:disabled,
 .private-sidebar-btn:disabled,
 .reset-btn:disabled,
-.conversation-item:disabled {
+.conversation-select:disabled,
+.conversation-delete:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -212,21 +213,55 @@ body::before {
   border-radius: 8px;
   background: transparent;
   color: var(--text-dim);
-  cursor: pointer;
   display: flex;
-  flex-direction: column;
+  align-items: stretch;
   gap: 4px;
   min-height: 68px;
-  padding: 9px 10px;
-  text-align: left;
+  padding: 4px;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.conversation-item:hover:not(:disabled),
+.conversation-item:hover,
 .conversation-item.active {
   background: var(--glass-bg);
   border-color: var(--glass-border);
   color: var(--text);
+}
+
+.conversation-select {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 5px 6px;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+}
+
+.conversation-delete {
+  width: 28px;
+  height: 28px;
+  align-self: flex-start;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.conversation-delete:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.13);
+  border-color: rgba(248, 113, 113, 0.25);
+  color: rgba(254, 202, 202, 0.95);
 }
 
 .conversation-title {
@@ -440,8 +475,16 @@ body::before {
   align-items: flex-end;
 }
 
-.input-textarea {
+.input-main {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-textarea {
+  width: 100%;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
@@ -461,14 +504,68 @@ body::before {
 .input-textarea:focus { border-color: rgba(37, 99, 235, 0.45); }
 .input-textarea:disabled { opacity: 0.45; cursor: not-allowed; }
 
+.file-input { display: none; }
+
+.file-chip {
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  background: rgba(13, 148, 136, 0.10);
+  border: 1px solid rgba(45, 212, 191, 0.22);
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 8px;
+  align-items: center;
+}
+
+.file-chip-name {
+  color: rgba(204, 251, 241, 0.92);
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-chip-meta {
+  color: rgba(204, 251, 241, 0.55);
+  font-size: 10.5px;
+  grid-column: 1;
+}
+
+.file-chip-remove {
+  width: 26px;
+  height: 26px;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(204, 251, 241, 0.68);
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.file-chip-remove:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(248, 113, 113, 0.22);
+  color: rgba(254, 202, 202, 0.95);
+}
+
+.file-error {
+  color: rgba(254, 202, 202, 0.95);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.attach-btn,
 .send-btn {
   width: 44px;
   height: 44px;
-  background: rgba(37, 99, 235, 0.85);
   border: none;
   border-radius: 12px;
-  color: #fff;
-  font-size: 17px;
   cursor: pointer;
   flex-shrink: 0;
   display: flex;
@@ -476,8 +573,28 @@ body::before {
   justify-content: center;
   transition: background 0.15s, transform 0.1s;
 }
+
+.attach-btn {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-dim);
+  font-size: 22px;
+}
+
+.attach-btn:hover:not(:disabled) {
+  background: var(--glass-bg-hover);
+  color: var(--text);
+}
+
+.send-btn {
+  background: rgba(37, 99, 235, 0.85);
+  color: #fff;
+  font-size: 17px;
+}
 .send-btn:hover:not(:disabled) { background: var(--accent-hover); }
+.attach-btn:active:not(:disabled),
 .send-btn:active:not(:disabled) { transform: scale(0.95); }
+.attach-btn:disabled,
 .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .send-btn.streaming { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }

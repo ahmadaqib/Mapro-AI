@@ -13,6 +13,7 @@ Mapro menggunakan model AI dari Xiaomi: `mimo-v2.5-pro`.
 - **Bahasa Indonesia yang Lugas**: Menggunakan gaya bahasa yang santai namun tetap tajam, intelektual, dan langsung pada intinya.
 - **Mode Privat**: Percakapan sementara yang tidak disimpan di riwayat lokal.
 - **Riwayat Percakapan**: Sesi web tersimpan otomatis dan bisa dibuka kembali dari sidebar.
+- **Analisis Dokumen**: Upload `.docx`, `.txt`, atau `.md` untuk dianalisis sebagai konteks chat.
 - **Tampilan Premium**: Antarmuka berbasis web modern dengan visual premium, efek *glassmorphism*, dan transisi halus.
 
 ## 🛠️ Instalasi & Menjalankan Project

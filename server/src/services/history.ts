@@ -26,7 +26,7 @@ function normalizeTitle(text: string): string {
   return clean.length > 42 ? `${clean.slice(0, 42)}...` : clean;
 }
 
-function createConversation(messages: Message[] = [], id = randomUUID()): Conversation {
+function createConversation(messages: Message[] = [], id: string = randomUUID()): Conversation {
   const timestamp = nowIso();
   const firstUserMessage = messages.find(message => message.role === 'user')?.content ?? '';
   return {
@@ -108,6 +108,7 @@ export function loadHistory(): Message[] {
 export function listConversations(): ConversationSummary[] {
   const store = loadStore();
   return store.conversations
+    .filter(conversation => conversation.messages.length > 0)
     .map(conversation => {
       const lastMessage = [...conversation.messages].reverse().find(message => message.content.trim());
       return {
@@ -132,6 +133,25 @@ export function createStoredConversation(): Conversation {
   store.activeConversationId = conversation.id;
   saveStore(store);
   return conversation;
+}
+
+export function deleteConversation(id: string): boolean {
+  const store = loadStore();
+  const nextConversations = store.conversations.filter(conversation => conversation.id !== id);
+  const deleted = nextConversations.length !== store.conversations.length;
+
+  if (!deleted) return false;
+
+  const activeConversationId = store.activeConversationId === id
+    ? nextConversations[0]?.id ?? null
+    : store.activeConversationId;
+
+  saveStore({
+    activeConversationId,
+    conversations: nextConversations,
+  });
+
+  return true;
 }
 
 export function ensureConversation(id?: string): Conversation {

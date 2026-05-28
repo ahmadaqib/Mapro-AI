@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import type { ApiMessage, Conversation, ConversationSummary, DisplayMessage } from '../types';
+import type { ApiMessage, Conversation, ConversationSummary, DisplayMessage, FileContext } from '../types';
 
 const API = 'http://localhost:3000';
 const ACTIVE_CONVERSATION_KEY = 'mapro.activeConversationId';
@@ -88,10 +88,31 @@ export function useChat() {
     localStorage.removeItem(ACTIVE_CONVERSATION_KEY);
   }, [isStreaming]);
 
-  const sendMessage = useCallback(async (text: string) => {
+  const deleteConversation = useCallback(async (id: string) => {
+    if (isStreaming) return;
+
+    const response = await fetch(`${API}/api/conversations/${id}`, { method: 'DELETE' });
+    if (!response.ok) return;
+
+    const nextConversations = await refreshConversations();
+    if (id !== activeConversationId) return;
+
+    setMessages([]);
+    setActiveConversationId(null);
+    localStorage.removeItem(ACTIVE_CONVERSATION_KEY);
+
+    if (nextConversations.length === 0) {
+      setIsPrivate(false);
+    }
+  }, [activeConversationId, isStreaming, refreshConversations]);
+
+  const sendMessage = useCallback(async (text: string, fileContext?: FileContext) => {
     if (!text.trim() || isStreaming) return;
     const historyForRequest = toApiMessages(messages);
     let targetConversationId = activeConversationId;
+    const visibleText = fileContext
+      ? `${text}\n\n[Lampiran: ${fileContext.name}]`
+      : text;
 
     if (!isPrivate && !targetConversationId) {
       const response = await fetch(`${API}/api/conversations`, { method: 'POST' });
@@ -104,7 +125,7 @@ export function useChat() {
     const userMsg: DisplayMessage = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: text,
+      content: visibleText,
       reasoning: '',
       isStreaming: false,
     };
@@ -126,10 +147,11 @@ export function useChat() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text,
+          message: visibleText,
           conversationId: targetConversationId,
           private: isPrivate,
           history: isPrivate ? historyForRequest : undefined,
+          fileContext,
         }),
       });
 
@@ -207,6 +229,7 @@ export function useChat() {
     resetHistory,
     startNewConversation,
     startPrivateConversation,
+    deleteConversation,
     loadConversation,
   };
 }

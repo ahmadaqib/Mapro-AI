@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import multipart from '@fastify/multipart';
 import { chatRoutes } from './routes/chat.js';
 
 const app = Fastify({ logger: false });
@@ -7,6 +8,13 @@ const app = Fastify({ logger: false });
 await app.register(cors, {
   origin: 'http://localhost:5173',
   methods: ['GET', 'POST', 'DELETE'],
+});
+
+await app.register(multipart, {
+  limits: {
+    files: 1,
+    fileSize: 5 * 1024 * 1024,
+  },
 });
 
 await app.register(chatRoutes);

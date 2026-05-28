@@ -4,6 +4,7 @@ interface Props {
   onReset: () => void;
   onNewConversation: () => void;
   onPrivateConversation: () => void;
+  onDeleteConversation: (id: string) => void;
   onSelectConversation: (id: string) => void;
   conversations: ConversationSummary[];
   activeConversationId: string | null;
@@ -27,6 +28,7 @@ export function Sidebar({
   onReset,
   onNewConversation,
   onPrivateConversation,
+  onDeleteConversation,
   onSelectConversation,
   conversations,
   activeConversationId,
@@ -78,21 +80,33 @@ export function Sidebar({
             <p className="conversation-empty">Belum ada percakapan tersimpan.</p>
           )}
           {conversations.map(conversation => (
-            <button
+            <div
               key={conversation.id}
               className={`conversation-item ${conversation.id === activeConversationId && !isPrivate ? 'active' : ''}`}
-              onClick={() => onSelectConversation(conversation.id)}
-              disabled={isStreaming}
             >
-              <span className="conversation-title">{conversation.title}</span>
-              <span className="conversation-meta">
-                {formatTime(conversation.updatedAt)}
-                {conversation.messageCount > 0 ? ` · ${conversation.messageCount} pesan` : ''}
-              </span>
-              {conversation.preview && (
-                <span className="conversation-preview">{conversation.preview}</span>
-              )}
-            </button>
+              <button
+                className="conversation-select"
+                onClick={() => onSelectConversation(conversation.id)}
+                disabled={isStreaming}
+              >
+                <span className="conversation-title">{conversation.title}</span>
+                <span className="conversation-meta">
+                  {formatTime(conversation.updatedAt)} · {conversation.messageCount} pesan
+                </span>
+                {conversation.preview && (
+                  <span className="conversation-preview">{conversation.preview}</span>
+                )}
+              </button>
+              <button
+                className="conversation-delete"
+                onClick={() => onDeleteConversation(conversation.id)}
+                disabled={isStreaming}
+                aria-label={`Hapus percakapan ${conversation.title}`}
+                title="Hapus percakapan"
+              >
+                ×
+              </button>
+            </div>
           ))}
         </div>
         <div className="divider" />

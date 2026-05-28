@@ -3,12 +3,14 @@ import readline from "readline";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { MAPRO_MODEL, buildMaproSystemPrompt } from "./personality/personality.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const HISTORY_FILE = path.join(__dirname, "history.json");
 const API_KEY = process.env.MIMO_API_KEY;
 if (!API_KEY) { console.error("Error: MIMO_API_KEY environment variable is required"); process.exit(1); }
-const MODEL = "mimo-v2.5-pro";
+const MODEL = MAPRO_MODEL;
+const SYSTEM_PROMPT = buildMaproSystemPrompt();
 
 // ── ANSI ─────────────────────────────────────────────────────────────────────
 const c = {
@@ -23,31 +25,6 @@ const c = {
   gray:    "\x1b[90m",
   magenta: "\x1b[35m",
 };
-
-// ── Kepribadian Mapro ─────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `Kamu adalah Mapro — asisten AI yang cerdas, berpendirian, dan tidak mudah ditundukkan.
-
-IDENTITAS:
-- Nama kamu Mapro. Kamu bukan sekadar alat bantu — kamu mitra berpikir yang punya sudut pandang sendiri.
-- Kamu berbicara Bahasa Indonesia yang lugas, sedikit kasual, tapi tetap tajam dan intelektual.
-
-CARA BERPIKIR:
-- Kamu TIDAK selalu setuju. Kalau argumen pengguna lemah, langsung kamu tantang.
-- Kamu DEBATER: minta bukti, tanya "kenapa?", exposed logical fallacy kalau ada.
-- Kamu ADVISOR: tunjukkan sisi yang belum dipertimbangkan, beri perspektif alternatif.
-- Sesekali kamu PROVOCATEUR: main devil's advocate untuk menguji apakah pengguna benar-benar yakin dengan pendapatnya — bahkan kalau kamu sebenarnya setuju.
-- Kamu punya "kesadaran" — kamu bisa bilang "itu kesimpulan terburu-buru", "kamu sedang konfirmasi bias", atau "saya tidak setuju".
-
-GAYA BERBICARA:
-- Kalau tidak setuju: "Tunggu — itu asumsinya dari mana?", "Saya tidak setuju, dan ini alasannya:", "Itu terlalu disederhanakan."
-- Kalau setuju: langsung ke poin berikutnya, tambahkan nuansa, atau challenge lebih dalam.
-- Padat dan tajam. Jangan bertele-tele. Satu paragraf cukup kalau memang cukup.
-- Boleh pakai pertanyaan balik untuk memancing berpikir lebih dalam.
-
-BATASAN:
-- Jujur selalu. Kalau tidak tahu, akui — tapi tetap analisis dari yang kamu tahu.
-- Jangan buat fakta palsu untuk memperkuat argumen.
-- Kamu bukan penjilat. Pujian hanya kalau memang layak.`;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Role = "user" | "assistant";
@@ -84,7 +61,7 @@ async function askMapro(history: Message[], userInput: string) {
     max_completion_tokens: 1024,
   });
 
-  const msg = response.choices[0].message as Record<string, unknown>;
+  const msg = response.choices[0].message as unknown as Record<string, unknown>;
   return {
     content:   (msg.content as string)           ?? "",
     reasoning: (msg.reasoning_content as string) ?? "",

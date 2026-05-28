@@ -26,3 +26,14 @@ export interface Conversation {
   updatedAt: string;
   messages: ApiMessage[];
 }
+
+export interface FileContext {
+  name: string;
+  text: string;
+}
+
+export interface ExtractedFile extends FileContext {
+  mimeType: string;
+  charCount: number;
+  truncated: boolean;
+}

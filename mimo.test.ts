@@ -80,7 +80,7 @@ describe("Chat Completions - mimo-v2.5-pro", () => {
 
     // content may be empty when model uses reasoning mode; check either field
     const content = response.choices[0].message.content ?? "";
-    const reasoningContent = (response.choices[0].message as Record<string, unknown>)["reasoning_content"] as string ?? "";
+    const reasoningContent = (response.choices[0].message as unknown as Record<string, unknown>)["reasoning_content"] as string ?? "";
     const fullText = content + reasoningContent;
     expect(fullText.length).toBeGreaterThan(0);
   });

@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import {
   appendHistory,
   createStoredConversation,
+  deleteConversation,
   ensureConversation,
   getConversation,
   listConversations,
@@ -9,7 +10,20 @@ import {
   resetHistory,
 } from '../services/history.js';
 import { streamMapro } from '../services/agent.js';
-import type { ChatRequest } from '../types.js';
+import { extractTextFromFile } from '../services/fileExtract.js';
+import type { ChatRequest, FileContext } from '../types.js';
+
+function withFileContext(message: string, fileContext?: FileContext): string {
+  if (!fileContext?.text.trim()) return message;
+
+  return `${message}
+
+[KONTEKS FILE TERLAMPIR]
+Nama file: ${fileContext.name}
+Isi teks:
+${fileContext.text}
+[/KONTEKS FILE TERLAMPIR]`;
+}
 
 export async function chatRoutes(fastify: FastifyInstance) {
   fastify.get('/api/history', async () => {
@@ -39,8 +53,36 @@ export async function chatRoutes(fastify: FastifyInstance) {
     return conversation;
   });
 
+  fastify.delete<{ Params: { id: string } }>('/api/conversations/:id', async (request, reply) => {
+    const deleted = deleteConversation(request.params.id);
+    if (!deleted) {
+      reply.code(404);
+      return { message: 'Conversation not found' };
+    }
+
+    return { ok: true };
+  });
+
+  fastify.post('/api/files/extract', async (request, reply) => {
+    try {
+      const file = await request.file();
+      if (!file) {
+        reply.code(400);
+        return { message: 'File wajib diunggah.' };
+      }
+
+      const buffer = await file.toBuffer();
+      return await extractTextFromFile(file.filename, file.mimetype, buffer);
+    } catch (err) {
+      reply.code(400);
+      return {
+        message: err instanceof Error ? err.message : 'Gagal membaca file.',
+      };
+    }
+  });
+
   fastify.post<{ Body: ChatRequest }>('/api/chat', async (request, reply) => {
-    const { message, conversationId, history = [], private: isPrivate } = request.body;
+    const { message, conversationId, history = [], private: isPrivate, fileContext } = request.body;
 
     reply.hijack();
     reply.raw.writeHead(200, {
@@ -55,9 +97,10 @@ export async function chatRoutes(fastify: FastifyInstance) {
     };
 
     const conversation = isPrivate ? null : ensureConversation(conversationId);
-    const previousMessages = isPrivate ? history : conversation.messages;
+    const previousMessages = conversation?.messages ?? history;
+    const modelMessage = withFileContext(message, fileContext);
 
-    const { content, reasoning } = await streamMapro(previousMessages, message, (type, text) => {
+    const { content, reasoning } = await streamMapro(previousMessages, modelMessage, (type, text) => {
       if (type === 'reasoning') send('reasoning', { text });
       else if (type === 'token')   send('token',     { text });
       else if (type === 'done')    send('done',      {});

@@ -15,6 +15,7 @@ export default function App() {
     resetHistory,
     startNewConversation,
     startPrivateConversation,
+    deleteConversation,
     loadConversation,
   } = useChat();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function App() {
         onReset={resetHistory}
         onNewConversation={startNewConversation}
         onPrivateConversation={startPrivateConversation}
+        onDeleteConversation={deleteConversation}
         onSelectConversation={(id) => {
           loadConversation(id);
           setSidebarOpen(false);
