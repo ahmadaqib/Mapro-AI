@@ -1,14 +1,105 @@
-import { useState, useCallback } from 'react';
-import type { DisplayMessage } from '../types';
+import { useEffect, useState, useCallback } from 'react';
+import type { ApiMessage, Conversation, ConversationSummary, DisplayMessage } from '../types';
 
 const API = 'http://localhost:3000';
+const ACTIVE_CONVERSATION_KEY = 'mapro.activeConversationId';
+
+function toDisplayMessages(messages: ApiMessage[]): DisplayMessage[] {
+  return messages.map(message => ({
+    id: crypto.randomUUID(),
+    role: message.role,
+    content: message.content,
+    reasoning: '',
+    isStreaming: false,
+  }));
+}
+
+function toApiMessages(messages: DisplayMessage[]): ApiMessage[] {
+  return messages
+    .filter(message => !message.isStreaming && message.content.trim())
+    .map(message => ({
+      role: message.role,
+      content: message.content,
+    }));
+}
 
 export function useChat() {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+
+  const refreshConversations = useCallback(async () => {
+    const response = await fetch(`${API}/api/conversations`);
+    const data = await response.json() as ConversationSummary[];
+    setConversations(data);
+    return data;
+  }, []);
+
+  const loadConversation = useCallback(async (id: string) => {
+    const response = await fetch(`${API}/api/conversations/${id}`);
+    if (!response.ok) return;
+
+    const conversation = await response.json() as Conversation;
+    setMessages(toDisplayMessages(conversation.messages));
+    setActiveConversationId(conversation.id);
+    setIsPrivate(false);
+    localStorage.setItem(ACTIVE_CONVERSATION_KEY, conversation.id);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    refreshConversations().then(async list => {
+      if (!isMounted || list.length === 0) return;
+
+      const storedId = localStorage.getItem(ACTIVE_CONVERSATION_KEY);
+      const initialConversation = list.find(item => item.id === storedId) ?? list[0];
+      await loadConversation(initialConversation.id);
+    }).catch(() => {
+      setConversations([]);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loadConversation, refreshConversations]);
+
+  const startNewConversation = useCallback(async () => {
+    if (isStreaming) return;
+
+    const response = await fetch(`${API}/api/conversations`, { method: 'POST' });
+    const conversation = await response.json() as Conversation;
+
+    setMessages([]);
+    setActiveConversationId(conversation.id);
+    setIsPrivate(false);
+    localStorage.setItem(ACTIVE_CONVERSATION_KEY, conversation.id);
+    await refreshConversations();
+  }, [isStreaming, refreshConversations]);
+
+  const startPrivateConversation = useCallback(() => {
+    if (isStreaming) return;
+
+    setMessages([]);
+    setActiveConversationId(null);
+    setIsPrivate(true);
+    localStorage.removeItem(ACTIVE_CONVERSATION_KEY);
+  }, [isStreaming]);
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isStreaming) return;
+    const historyForRequest = toApiMessages(messages);
+    let targetConversationId = activeConversationId;
+
+    if (!isPrivate && !targetConversationId) {
+      const response = await fetch(`${API}/api/conversations`, { method: 'POST' });
+      const conversation = await response.json() as Conversation;
+      targetConversationId = conversation.id;
+      setActiveConversationId(conversation.id);
+      localStorage.setItem(ACTIVE_CONVERSATION_KEY, conversation.id);
+    }
 
     const userMsg: DisplayMessage = {
       id: crypto.randomUUID(),
@@ -34,7 +125,12 @@ export function useChat() {
       const response = await fetch(`${API}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({
+          message: text,
+          conversationId: targetConversationId,
+          private: isPrivate,
+          history: isPrivate ? historyForRequest : undefined,
+        }),
       });
 
       if (!response.body) throw new Error('No response body');
@@ -84,13 +180,33 @@ export function useChat() {
       ));
     } finally {
       setIsStreaming(false);
+      if (!isPrivate) {
+        await refreshConversations();
+      }
     }
-  }, [isStreaming]);
+  }, [activeConversationId, isPrivate, isStreaming, messages, refreshConversations]);
 
   const resetHistory = useCallback(async () => {
-    await fetch(`${API}/api/history`, { method: 'DELETE' });
-    setMessages([]);
-  }, []);
+    if (isStreaming) return;
 
-  return { messages, isStreaming, sendMessage, resetHistory };
+    if (!isPrivate && activeConversationId) {
+      await fetch(`${API}/api/history?conversationId=${activeConversationId}`, { method: 'DELETE' });
+      await refreshConversations();
+    }
+
+    setMessages([]);
+  }, [activeConversationId, isPrivate, isStreaming, refreshConversations]);
+
+  return {
+    messages,
+    conversations,
+    activeConversationId,
+    isPrivate,
+    isStreaming,
+    sendMessage,
+    resetHistory,
+    startNewConversation,
+    startPrivateConversation,
+    loadConversation,
+  };
 }
